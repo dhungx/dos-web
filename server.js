@@ -43,7 +43,8 @@ app.post('/dos', async (req, res) => {
     });
 });
 
-// Thay đổi app.listen để lắng nghe trên tất cả các IP
-app.listen(3000, '0.0.0.0', () => {
-    console.log('Server đang chạy trên http://0.0.0.0:3000');
+// Lắng nghe trên tất cả các IP và cổng 3000
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server đang chạy trên http://0.0.0.0:${PORT}`);
 });
