@@ -43,6 +43,7 @@ app.post('/dos', async (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log('Server đang chạy trên http://localhost:3000');
+// Thay đổi app.listen để lắng nghe trên tất cả các IP
+app.listen(3000, '0.0.0.0', () => {
+    console.log('Server đang chạy trên http://0.0.0.0:3000');
 });
