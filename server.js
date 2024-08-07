@@ -4,6 +4,8 @@ const async = require('async');
 const path = require('path');
 
 const app = express();
+const port = process.env.PORT || 3000; // Railway tự động cấp cổng thông qua biến môi trường PORT
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -43,8 +45,6 @@ app.post('/dos', async (req, res) => {
     });
 });
 
-// Lắng nghe trên tất cả các IP và cổng 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server đang chạy trên http://0.0.0.0:${PORT}`);
+app.listen(port, () => {
+    console.log(`Server đang chạy trên http://localhost:${port}`);
 });
