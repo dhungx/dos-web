@@ -36,10 +36,10 @@ app.post('/dos', (req, res) => {
             if (currentTime - startTime >= duration) {
                 isRunning = false;
                 return res.send(`
-                    Quá trình tấn công đã kết thúc sau 60 giây.<br>
-                    Truy cập thành công: ${successfulRequests}<br>
-                    Truy cập thất bại: ${failedRequests}<br>
-                    ${errorMessages.length > 0 ? `Lỗi:<br>${errorMessages.join('<br>')}` : ''}
+                    <p>Quá trình tấn công đã kết thúc sau 60 giây.</p>
+                    <p>Truy cập thành công: <strong>${successfulRequests}</strong></p>
+                    <p>Truy cập thất bại: <strong>${failedRequests}</strong></p>
+                    ${errorMessages.length > 0 ? `<p>Lỗi:</p><pre>${errorMessages.join('\n')}</pre>` : ''}
                 `);
             }
 
